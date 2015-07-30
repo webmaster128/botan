@@ -1,0 +1,14 @@
+define PKCS8 20150729
+
+<source>
+pkcs8.cpp
+</source>
+
+<header:public>
+pkcs8.h
+</header:public>
+
+<requires>
+pubkey
+pbes2
+</requires>

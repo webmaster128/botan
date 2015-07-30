@@ -6,7 +6,7 @@
 
 #include "apps.h"
 
-#if defined(BOTAN_HAS_X509_CERTIFICATES)
+#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_PKCS8)
 
 #include <botan/x509_ca.h>
 #include <botan/pkcs8.h>

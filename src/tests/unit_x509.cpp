@@ -8,7 +8,7 @@
 
 #if defined(BOTAN_HAS_X509_CERTIFICATES)
 
-#if defined(BOTAN_HAS_RSA) && defined(BOTAN_HAS_DSA)
+#if defined(BOTAN_HAS_RSA) && defined(BOTAN_HAS_DSA) && defined(BOTAN_HAS_PKCS8)
 
 #include <botan/calendar.h>
 #include <botan/filters.h>
@@ -256,7 +256,7 @@ size_t test_x509()
 
 UNTESTED_WARNING(x509);
 
-#endif // BOTAN_HAS_RSA && BOTAN_HAS_DSA
+#endif // BOTAN_HAS_RSA && BOTAN_HAS_DSA && BOTAN_HAS_PKCS8
 
 #else
 

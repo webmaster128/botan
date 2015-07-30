@@ -15,9 +15,12 @@
 #include <sstream>
 #include <botan/mem_ops.h>
 #include <botan/parsing.h>
-#include <botan/pkcs8.h>
 #include <botan/pubkey.h>
 #include <botan/x509_key.h>
+
+#if defined(BOTAN_HAS_PKCS8)
+   #include <botan/pkcs8.h>
+#endif
 
 #if defined(BOTAN_HAS_RSA)
   #include <botan/rsa.h>

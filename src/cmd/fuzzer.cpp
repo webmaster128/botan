@@ -8,7 +8,7 @@
 #include <fstream>
 #include <botan/auto_rng.h>
 
-#if defined(BOTAN_HAS_X509_CERTIFICATES)
+#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_PKCS8)
 #include <botan/x509cert.h>
 #include <botan/x509_crl.h>
 #include <botan/pkcs8.h>
@@ -63,7 +63,7 @@ int fuzzer(int argc, char* argv[])
 
    AutoSeeded_RNG rng;
 
-#if defined(BOTAN_HAS_X509_CERTIFICATES)
+#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_PKCS8)
    if(type == "cert")
       {
       X509_Certificate cert(input);

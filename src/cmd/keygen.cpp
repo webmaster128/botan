@@ -6,7 +6,7 @@
 
 #include "apps.h"
 
-#if defined(BOTAN_HAS_PUBLIC_KEY_CRYPTO) && defined(BOTAN_HAS_X509_CERTIFICATES)
+#if defined(BOTAN_HAS_PUBLIC_KEY_CRYPTO) && defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_PKCS8)
 
 #include <iostream>
 #include <fstream>
@@ -126,4 +126,4 @@ REGISTER_APP(keygen);
 
 }
 
-#endif // BOTAN_HAS_PUBLIC_KEY_CRYPTO && BOTAN_HAS_X509_CERTIFICATES
+#endif // BOTAN_HAS_PUBLIC_KEY_CRYPTO && BOTAN_HAS_X509_CERTIFICATES && BOTAN_HAS_PKCS8

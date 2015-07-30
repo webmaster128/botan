@@ -5,7 +5,6 @@ blinding.cpp
 pk_algs.cpp
 pk_keys.cpp
 pk_ops.cpp
-pkcs8.cpp
 pubkey.cpp
 workfactor.cpp
 x509_key.cpp
@@ -15,7 +14,6 @@ x509_key.cpp
 blinding.h
 pk_keys.h
 pk_ops.h
-pkcs8.h
 pubkey.h
 x509_key.h
 workfactor.h
@@ -32,7 +30,6 @@ asn1
 bigint
 kdf
 oid_lookup
-pbes2
 pem
 pk_pad
 numbertheory

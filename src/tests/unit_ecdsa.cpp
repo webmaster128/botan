@@ -12,7 +12,7 @@
 
 #if defined(BOTAN_HAS_ECDSA)
 
-#if defined(BOTAN_HAS_RSA)
+#if defined(BOTAN_HAS_RSA) && defined(BOTAN_HAS_PKCS8)
 
 #include <botan/hex.h>
 #include <botan/pkcs8.h>
@@ -498,7 +498,7 @@ size_t test_ecdsa_unit()
 
 UNTESTED_WARNING(ecdsa_unit);
 
-#endif // BOTAN_HAS_RSA
+#endif // BOTAN_HAS_RSA && BOTAN_HAS_PKCS8
 
 #else
 
