@@ -1801,7 +1801,7 @@ def main(argv = None):
     if argv is None:
         argv = sys.argv
 
-    class BotanConfigureLogHandler(logging.StreamHandler, object):
+    class BotanConfigureLogHandler(logging.StreamHandler):
         def emit(self, record):
             # Do the default stuff first
             super(BotanConfigureLogHandler, self).emit(record)
@@ -1809,7 +1809,7 @@ def main(argv = None):
             if record.levelno >= logging.ERROR:
                 sys.exit(1)
 
-    lh = BotanConfigureLogHandler(sys.stdout)
+    lh = BotanConfigureLogHandler(stream = sys.stdout)
     lh.setFormatter(logging.Formatter('%(levelname) 7s: %(message)s'))
     logging.getLogger().addHandler(lh)
 
