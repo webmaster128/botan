@@ -52,7 +52,7 @@ class Compress : public Command
                                   const std::string& comp_type)
          {
          const std::map<std::string, std::string> suffixes = {
-            { "zlib", "zlib" },
+            { "zlib", "zip" },
             { "gzip", "gz" },
             { "bzip2", "bz2" },
             { "lzma", "xz" },
