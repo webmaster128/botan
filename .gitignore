@@ -13,9 +13,6 @@ build.log
 botan
 botan-test
 
-# Build system
-CMakeLists.txt.user
-
 # Text file backups (e.g. gedit, joe)
 *~
 \#*\#
