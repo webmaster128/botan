@@ -8,7 +8,14 @@ Configuration program for botan
 
 Botan is released under the Simplified BSD License (see license.txt)
 
-Tested with CPython 2.7 and 3.4. CPython 2.6 and earlier are not supported.
+This script is regularly tested with CPython 2.7 and 3.5, and
+occasionally tested with CPython 2.6 and PyPy 4.
+
+Support for CPython 2.6 will be dropped eventually, but is kept up for as
+long as reasonably convenient.
+
+CPython 2.5 and earlier are not supported.
+
 On Jython target detection does not work (use --os and --cpu).
 """
 
@@ -1801,7 +1808,7 @@ def main(argv = None):
     if argv is None:
         argv = sys.argv
 
-    class BotanConfigureLogHandler(logging.StreamHandler):
+    class BotanConfigureLogHandler(logging.StreamHandler, object):
         def emit(self, record):
             # Do the default stuff first
             super(BotanConfigureLogHandler, self).emit(record)
@@ -1809,7 +1816,7 @@ def main(argv = None):
             if record.levelno >= logging.ERROR:
                 sys.exit(1)
 
-    lh = BotanConfigureLogHandler(stream = sys.stdout)
+    lh = BotanConfigureLogHandler(sys.stdout)
     lh.setFormatter(logging.Formatter('%(levelname) 7s: %(message)s'))
     logging.getLogger().addHandler(lh)
 
@@ -1950,16 +1957,43 @@ def main(argv = None):
 
     # Now begin the actual IO to setup the build
 
+    # Workaround for Windows systems where antivirus is enabled GH #353
+    def robust_rmtree(path, max_retries=5):
+        for _ in range(max_retries):
+            try:
+                shutil.rmtree(path)
+                return
+            except OSError:
+                time.sleep(0.1)
+
+        # Final attempt, pass any Exceptions up to caller.
+        shutil.rmtree(path)
+
+    # Workaround for Windows systems where antivirus is enabled GH #353
+    def robust_makedirs(directory, max_retries=5):
+        for _ in range(max_retries):
+            try:
+                os.makedirs(directory)
+                return
+            except OSError as e:
+                if e.errno == errno.EEXIST:
+                    raise
+                else:
+                    time.sleep(0.1)
+
+        # Final attempt, pass any Exceptions up to caller.
+        os.makedirs(dir)
+
     try:
         if options.clean_build_tree:
-            shutil.rmtree(build_config.build_dir)
+            robust_rmtree(build_config.build_dir)
     except OSError as e:
         if e.errno != errno.ENOENT:
             logging.error('Problem while removing build dir: %s' % (e))
 
     for dir in build_config.build_dirs:
         try:
-            os.makedirs(dir)
+            robust_makedirs(dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 logging.error('Error while creating "%s": %s' % (dir, e))

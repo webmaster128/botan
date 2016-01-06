@@ -1,6 +1,6 @@
 /*
 * TLS Extensions
-* (C) 2011,2012,2015 Jack Lloyd
+* (C) 2011,2012,2015,2016 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -39,11 +39,14 @@ Extension* make_extension(TLS_Data_Reader& reader,
       case TLSEXT_SIGNATURE_ALGORITHMS:
          return new Signature_Algorithms(reader, size);
 
-        case TLSEXT_USE_SRTP:
+      case TLSEXT_USE_SRTP:
           return new SRTP_Protection_Profiles(reader, size);
 
       case TLSEXT_ALPN:
          return new Application_Layer_Protocol_Notification(reader, size);
+
+      case TLSEXT_EXTENDED_MASTER_SECRET:
+         return new Extended_Master_Secret(reader, size);
 
       case TLSEXT_HEARTBEAT_SUPPORT:
          return new Heartbeat_Support_Indicator(reader, size);
@@ -424,7 +427,7 @@ Supported_Elliptic_Curves::Supported_Elliptic_Curves(TLS_Data_Reader& reader,
       const u16bit id = reader.get_u16bit();
       const std::string name = curve_id_to_name(id);
 
-      if(name != "")
+      if(!name.empty())
          m_curves.push_back(name);
       }
    }
@@ -552,7 +555,7 @@ Signature_Algorithms::Signature_Algorithms(TLS_Data_Reader& reader,
       len -= 2;
 
       // If not something we know, ignore it completely
-      if(hash_code == "" || sig_code == "")
+      if(hash_code.empty() || sig_code.empty())
          continue;
 
       m_supported_algos.push_back(std::make_pair(hash_code, sig_code));
@@ -596,6 +599,18 @@ std::vector<byte> SRTP_Protection_Profiles::serialize() const
    buf.push_back(0); // srtp_mki, always empty here
 
    return buf;
+   }
+
+Extended_Master_Secret::Extended_Master_Secret(TLS_Data_Reader&,
+                                               u16bit extension_size)
+   {
+   if(extension_size != 0)
+      throw Decoding_Error("Invalid extended_master_secret extension");
+   }
+
+std::vector<byte> Extended_Master_Secret::serialize() const
+   {
+   return std::vector<byte>();
    }
 
 }

@@ -1,6 +1,6 @@
 /*
 * TLS Server Hello and Server Hello Done
-* (C) 2004-2011,2015 Jack Lloyd
+* (C) 2004-2011,2015,2016 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -35,6 +35,9 @@ Server_Hello::Server_Hello(Handshake_IO& io,
    m_ciphersuite(ciphersuite),
    m_comp_method(compression)
    {
+   if(client_hello.supports_extended_master_secret())
+      m_extensions.add(new Extended_Master_Secret);
+
    if(client_hello.secure_renegotiation())
       m_extensions.add(new Renegotiation_Extension(reneg_info));
 
@@ -47,7 +50,7 @@ Server_Hello::Server_Hello(Handshake_IO& io,
    if(policy.negotiate_heartbeat_support() && client_hello.supports_heartbeats())
       m_extensions.add(new Heartbeat_Support_Indicator(true));
 
-   if(next_protocol != "" && client_hello.supports_alpn())
+   if(!next_protocol.empty() && client_hello.supports_alpn())
       m_extensions.add(new Application_Layer_Protocol_Notification(next_protocol));
 
    if(m_version.is_datagram_protocol())
@@ -90,6 +93,9 @@ Server_Hello::Server_Hello(Handshake_IO& io,
    m_ciphersuite(resumed_session.ciphersuite_code()),
    m_comp_method(resumed_session.compression_method())
    {
+   if(client_hello.supports_extended_master_secret())
+      m_extensions.add(new Extended_Master_Secret);
+
    if(client_hello.secure_renegotiation())
       m_extensions.add(new Renegotiation_Extension(reneg_info));
 
@@ -102,7 +108,7 @@ Server_Hello::Server_Hello(Handshake_IO& io,
    if(policy.negotiate_heartbeat_support() && client_hello.supports_heartbeats())
       m_extensions.add(new Heartbeat_Support_Indicator(true));
 
-   if(next_protocol != "" && client_hello.supports_alpn())
+   if(!next_protocol.empty() && client_hello.supports_alpn())
       m_extensions.add(new Application_Layer_Protocol_Notification(next_protocol));
 
    hash.update(io.send(*this));

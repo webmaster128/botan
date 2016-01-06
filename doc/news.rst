@@ -1,22 +1,34 @@
 Release Notes
 ========================================
 
-Version 1.11.26, Not Yet Released
+Version 1.11.26, 2016-01-04
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Deprecation warning: Nyberg-Rueppel signatures, MARS, RC2, RC5, RC6,
-  SAFER, HAS-160, RIPEMD-128, and MD2 are being considered for removal
-  in a future release. If there is a compelling use case for keeping
-  any of them in the library, please open a discussion ticket on GitHub.
+* Deprecation warnings: Nyberg-Rueppel signatures, MARS, RC2, RC5,
+  RC6, SAFER, HAS-160, RIPEMD-128, MD2 and support for the TLS minimum
+  fragment length extensions are all being considered for removal in a
+  future release. If there is a compelling use case for keeping any of
+  them in the library, please open a discussion ticket on GitHub.
 
-* Root all exceptions thrown by the library in the `Botan::Exception` class.
-  Previously the library would in many cases throw `std::runtime_error`
-  or `std::invalid_argument` exceptions which would make it hard to determine
-  the source of the error in some cases.
+* Support for the TLS extended master secret extension (RFC 7627) has
+  been added.
+
+* The format of serialized TLS sessions has changed to add a flag
+  indicating support for the extended master secret flag, which is
+  needed for proper handling of the extension.
+
+* Root all exceptions thrown by the library in the ``Botan::Exception`` class.
+  Previously the library would in many cases throw ``std::runtime_error``
+  or ``std::invalid_argument`` exceptions which would make it hard to
+  determine the source of the error in some cases.
 
 * The command line interface has been mostly rewritten. The syntax of
-  many of the programs has changed, and a number have been extended with
-  new features and options.
+  many of the sub-programs has changed, and a number have been
+  extended with new features and options.
+
+* Correct an error in PointGFp multiplication when multiplying a point
+  by the scalar value 3. PointGFp::operator* would instead erronously
+  compute it as if the scalar was 1 instead.
 
 * Enable RdRand entropy source on Windows/MSVC. GH #364
 
@@ -34,13 +46,50 @@ Version 1.11.26, Not Yet Released
 
 * Add support for RSA-KEM from ISO 18033-2
 
+* Add support for ECDH in the OpenSSL provider
+
+* Fix a bug in DataSource::discard_next() which could cause either an
+  infinite loop or the discarding of an incorrect number of bytes.
+  Reported on mailing list by Falko Strenzke.
+
+* Previously if BOTAN_TARGET_UNALIGNED_MEMORY_ACCESS_OK was defined,
+  the code doing low level loads/stores would use pointer casts to
+  access larger words out of a (potentially misaligned) byte array,
+  rather than using byte-at-a-time accesses. However even on platforms
+  such as x86 where this works, it triggers UBSan errors under Clang.
+  Instead use memcpy, which the C standard says is usable for such
+  purposes even with misaligned values. With recent GCC and Clang, the
+  same code seems to be emitted for either approach.
+
 * Avoid calling memcpy, memset, or memmove with a length of zero to
   avoid undefined behavior, as calling these functions with an invalid
   or null pointer, even with a length of zero, is invalid. Often there
   are corner cases where this can occur, such as pointing to the very
   end of a buffer.
 
+* The function ``RandomNumberGenerator::gen_mask`` (added in 1.11.20)
+  had undefined behavior when called with a bits value of 32 or
+  higher, and was tested to behave in unpleasant ways (such as
+  returning zero) when compiled by common compilers. This function was
+  not being used anywhere in the library and rather than support
+  something without a use case to justify it it seemed simpler to
+  remove it. Undefined behavior found by Daniel Neus.
+
+* Support for using ``ctgrind`` for checking const time blocks has
+  been replaced by calling the valgrind memcheck APIs directly. This
+  allows const-time behavior to be tested without requiring a modified
+  valgrind binary. Adding the appropriate calls requires defining
+  BOTAN_HAS_VALGRIND in build.h. A binary compiled with this flag set
+  can still run normally (though with some slight runtime overhead).
+
 * Export MGF1 function mgf1_mask GH #380
+
+* Work around a problem with some antivirus programs which causes the
+  ``shutil.rmtree`` and ``os.makedirs`` Python calls to occasionally
+  fail. The could prevent ``configure.py`` from running sucessfully
+  on such systems. GH #353
+
+* Let ``configure.py`` run under CPython 2.6. GH #362
 
 Version 1.11.25, 2015-12-07
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

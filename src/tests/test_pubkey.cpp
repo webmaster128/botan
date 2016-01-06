@@ -289,21 +289,34 @@ Test::Result PK_KEM_Test::run_one_test(const std::string&, const VarMap& vars)
    return result;
    }
 
-Test::Result PK_Key_Agreement_Test::run_one_test(const std::string&, const VarMap& vars)
+Test::Result PK_Key_Agreement_Test::run_one_test(const std::string& header, const VarMap& vars)
    {
    const std::vector<uint8_t> shared = get_req_bin(vars, "K");
    const std::string kdf = get_opt_str(vars, "KDF", default_kdf(vars));
 
-   Test::Result result(algo_name() + "/" + kdf + " key agreement");
+   Test::Result result(algo_name() + "/" + kdf +
+                       (header.empty() ? header : " " + header) +
+                       " key agreement");
 
-   std::unique_ptr<Botan::Private_Key> privkey = load_our_key(vars);
-   const std::vector<uint8_t> pubkey = load_their_key(vars);
+   std::unique_ptr<Botan::Private_Key> privkey = load_our_key(header, vars);
+   const std::vector<uint8_t> pubkey = load_their_key(header, vars);
 
    const size_t key_len = get_opt_sz(vars, "OutLen", 0);
 
-   Botan::PK_Key_Agreement kas(*privkey, kdf);
+   for(auto&& provider : possible_pk_providers())
+      {
+      std::unique_ptr<Botan::PK_Key_Agreement> kas;
 
-   result.test_eq("agreement", kas.derive_key(key_len, pubkey).bits_of(), shared);
+      try
+         {
+         kas.reset(new Botan::PK_Key_Agreement(*privkey, kdf, provider));
+         result.test_eq(provider, "agreement", kas->derive_key(key_len, pubkey).bits_of(), shared);
+         }
+      catch(Botan::Lookup_Error&)
+         {
+         //result.test_note("Skipping key agreement with with " + provider);
+         }
+      }
 
    return result;
    }
@@ -371,8 +384,6 @@ PK_Key_Generation_Test::test_key(const std::string& algo, const Botan::Private_K
       result.test_failure("roundtrip PEM private key", e.what());
       }
 
-   /*
-   // Currently broken GH #379
    try
       {
       Botan::DataSource_Memory data_src(Botan::PKCS8::BER_encode(key));
@@ -386,7 +397,6 @@ PK_Key_Generation_Test::test_key(const std::string& algo, const Botan::Private_K
       {
       result.test_failure("roundtrip BER private key", e.what());
       }
-   */
 
    const std::string passphrase = Test::random_password();
 
